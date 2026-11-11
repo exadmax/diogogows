@@ -1,0 +1,2 @@
+- Traduções: `node scripts/check-i18n.js` confere se pt/en/es/zh têm as mesmas chaves e se toda chave usada no código existe (rode depois de mudar textos em `www/js/i18n/`).
+- Servidor: `server/package.sh` gera `server/dist/diogows.tgz` (Linux) e `diogows-windows.zip`; no Linux: `sudo bash install.sh` (ver server/).

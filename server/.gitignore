@@ -1,0 +1,8 @@
+/diogows.config.json
+/dist/
+/diogows
+/diogows.log
+/games.state.json
+/desk/
+/*.db
+/*.db-*

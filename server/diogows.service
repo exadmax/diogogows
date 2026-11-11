@@ -1,0 +1,17 @@
+[Unit]
+Description=Diogows (area de trabalho no navegador)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=__USER__
+WorkingDirectory=/opt/diogows
+ExecStart=/opt/diogows/diogows -config /opt/diogows/diogows.config.json
+NoNewPrivileges=true
+Restart=always
+RestartSec=5
+# maquina com pouca memoria, dividida com a Central Diogo, o Navidrome e outros servicos
+MemoryMax=500M
+
+[Install]
+WantedBy=multi-user.target

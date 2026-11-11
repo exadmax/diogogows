@@ -1,33 +1,25 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
-# Binaries for programs and plugins
+node_modules/
+www/config/settings.js
+www/vendor/zetaoffice/
+build/
+
+server/diogows.config.json
+server/dist/
+server/games.state.json
+
+# binários locais, bancos SQLite e chaves (nunca versionar)
 *.exe
-*.exe~
-*.dll
-*.so
-*.dylib
+*.db
+*.db-wal
+*.db-shm
+key/
 
-# Test binary, built with `go test -c`
-*.test
+# instância de demonstração (server/demo): só o diogows.config.json e o README são versionados
+server/demo/*
+!server/demo/diogows.config.json
+!server/demo/README.md
 
-# Code coverage profiles and other test artifacts
-*.out
-coverage.*
-!coverage.go
-*.coverprofile
-profile.cov
-
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-# Go workspace file
-go.work
-go.work.sum
-
-# env file
-.env
-
-# Editor/IDE
-# .idea/
-# .vscode/
+# ferramentas locais do Claude Code
+.claude/agents/
+.claude/skills/
+.claude/settings.local.json

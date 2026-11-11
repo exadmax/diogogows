@@ -1,0 +1,15 @@
+{
+  "listen": ":8090",
+  "staticDir": "../www",
+  "dbPath": "diogows.db",
+  "central": {"url": "http://127.0.0.1:8080"},
+  "games": {
+    "cacheMinutes": 360,
+    "stateFile": "games.state.json",
+    "steam": {"key": "", "user": ""},
+    "psn": {"npsso": "", "user": ""},
+    "xbox": {"clientId": "", "clientSecret": "", "gamertag": ""},
+    "retro": {"key": "", "user": ""}
+  },
+  "desk": {"shell": false, "maxUploadMB": 2048}
+}

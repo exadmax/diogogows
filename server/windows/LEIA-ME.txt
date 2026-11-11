@@ -1,0 +1,16 @@
+Diogows para Windows
+
+1. Extraia este .zip inteiro (clique com o botao direito > Extrair tudo).
+2. Abra a pasta extraida e de dois cliques em "Instalar.cmd".
+3. Na janela, escolha como vai usar:
+   - Servidor da casa: o computador fica ligado e atende os outros aparelhos da casa (pede permissao de administrador).
+   - Meu computador: so para voce, neste PC (nao abre nada na rede).
+4. Clique em Instalar e depois em "Abrir o Diogows". Anote a senha inicial do usuario "admin" mostrada no fim da instalacao.
+
+O Diogows funciona sozinho. A Central Diogo (painel da casa: agenda, clima, cameras, estoque) e outro programa, com o proprio
+instalador: se ela estiver instalada neste computador, o Diogows se liga a ela sozinho (cameras, contatos e agendas da casa).
+
+Para atualizar, extraia a versao nova e abra o Instalar.cmd de novo: seus dados sao mantidos.
+Para remover: Configuracoes do Windows > Aplicativos > Diogows, ou o Desinstalar.cmd da pasta de instalacao.
+
+Use so na rede da sua casa e nao exponha a internet sem VPN (veja SECURITY.md no GitHub).

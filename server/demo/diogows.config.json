@@ -1,0 +1,8 @@
+{
+  "listen": ":8091",
+  "staticDir": "../../www",
+  "dbPath": "demo-diogows.db",
+  "central": {"url": ""},
+  "videos": {"dir": "videos"},
+  "desk": {"dir": "desk", "shell": false, "maxUploadMB": 256}
+}
