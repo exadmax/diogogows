@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diogows — uma área de trabalho no navegador</title>
+  <meta name="description" content="Área de trabalho no navegador, de código aberto: janelas, menu Iniciar, vários usuários, documentos, planilhas, e-mail, mensagens, emuladores e programas DOS, num servidor leve em Go.">
+  <meta name="theme-color" content="#0B1220">
+  <meta property="og:title" content="Diogows — uma área de trabalho no navegador">
+  <meta property="og:description" content="Janelas, menu Iniciar, vários usuários, escritório, e-mail e emuladores no navegador. Código aberto (GPL-3.0).">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://exadmax.github.io/diogogows/img/desktop-explorer.png">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/logo-192.png">
+  <style>
+    @font-face { font-family: 'Inter'; font-weight: 400 700; font-display: swap; src: url(assets/fonts/inter-latin.woff2) format('woff2'); }
+    @font-face { font-family: 'Poppins'; font-weight: 600; font-display: swap; src: url(assets/fonts/poppins-600.woff2) format('woff2'); }
+    @font-face { font-family: 'Poppins'; font-weight: 700; font-display: swap; src: url(assets/fonts/poppins-700.woff2) format('woff2'); }
+
+    :root {
+      --bg: #0B1220; --bg2: #0E1729; --card: #131C2E; --card2: #18233A; --line: rgba(242, 245, 250, .1);
+      --text: #F2F5FA; --dim: rgba(242, 245, 250, .66); --blue: #4DA3FF; --green: #33E19A; --amber: #FFB020; --red: #FF6B6B;
+      --grad: linear-gradient(135deg, #4DA3FF, #33E19A);
+      --wrap: 1120px;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 76px; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 400 17px/1.6 'Inter', system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    img { max-width: 100%; display: block; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    h1, h2, h3 { font-family: 'Poppins', 'Inter', system-ui, sans-serif; margin: 0; line-height: 1.15; }
+    code { font: 14px/1.5 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .wrap { width: min(var(--wrap), 100% - 40px); margin-inline: auto; }
+    section { padding: 88px 0; }
+    .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 1.6px; text-transform: uppercase; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .sec-h { margin: 10px 0 14px; font-size: clamp(28px, 4vw, 40px); font-weight: 700; letter-spacing: -.5px; }
+    .sec-p { margin: 0 0 40px; max-width: 680px; color: var(--dim); font-size: 18px; }
+
+    /* barra */
+    .nav { position: sticky; top: 0; z-index: 50; background: rgba(11, 18, 32, .82); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
+    .nav .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 12px; color: var(--text); font: 700 18px 'Poppins', sans-serif; }
+    .brand img { width: 36px; height: 36px; border-radius: 10px; }
+    .brand:hover { text-decoration: none; }
+    .nav ul { display: flex; gap: 26px; list-style: none; margin: 0; padding: 0; }
+    .nav li a { color: var(--dim); font-size: 15px; font-weight: 500; }
+    .nav li a:hover { color: var(--text); text-decoration: none; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 46px; padding: 0 24px; border-radius: 999px; border: 1px solid transparent; font: 600 16px 'Inter', sans-serif; cursor: pointer; transition: transform .15s, filter .15s; }
+    .btn:hover { text-decoration: none; transform: translateY(-1px); filter: brightness(1.08); }
+    .btn.pri { background: var(--grad); color: #06101F; }
+    .btn.ghost { background: transparent; color: var(--text); border-color: rgba(242, 245, 250, .28); }
+    .btn.sm { min-height: 38px; padding: 0 18px; font-size: 14px; }
+    .btn svg { width: 19px; height: 19px; }
+
+    /* herói */
+    .hero { position: relative; overflow: hidden; padding: 72px 0 40px; background: radial-gradient(900px 500px at 78% -5%, rgba(77, 163, 255, .22), transparent 70%), radial-gradient(700px 420px at 12% 12%, rgba(51, 225, 154, .13), transparent 70%); }
+    .hero-grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+    .pill { display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(255, 255, 255, .04); font-size: 13px; color: var(--dim); }
+    .pill i { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 10px var(--green); }
+    .hero h1 { margin: 20px 0 18px; font-size: clamp(38px, 6vw, 62px); font-weight: 700; letter-spacing: -1.5px; }
+    .hero h1 em { font-style: normal; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero p.lead { margin: 0 0 30px; max-width: 540px; font-size: 19px; color: var(--dim); }
+    .cta { display: flex; flex-wrap: wrap; gap: 12px; }
+    .badges { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+    .badge { padding: 5px 12px; border-radius: 8px; background: var(--card); border: 1px solid var(--line); font-size: 13px; font-weight: 600; color: var(--dim); }
+    .badge b { color: var(--text); }
+    .frame { position: relative; border-radius: 18px; padding: 8px; background: linear-gradient(145deg, rgba(77, 163, 255, .55), rgba(51, 225, 154, .35)); box-shadow: 0 30px 80px rgba(0, 0, 0, .55), 0 0 90px rgba(77, 163, 255, .18); }
+    .frame img { border-radius: 12px; width: 100%; height: auto; background: var(--bg); }
+    .hero-shot { transform: perspective(1400px) rotateY(-6deg) rotateX(2deg); transition: transform .5s; }
+    .hero-shot:hover { transform: none; }
+
+    /* faixa de números */
+    .stats { padding: 0 0 8px; }
+    .stats-in { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; border-radius: 16px; overflow: hidden; background: var(--line); border: 1px solid var(--line); }
+    .stat { padding: 22px 20px; background: var(--bg2); text-align: center; }
+    .stat b { display: block; font: 700 28px 'Poppins', sans-serif; background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .stat span { font-size: 14px; color: var(--dim); }
+
+    /* recursos */
+    .grid { display: grid; gap: 18px; }
+    .feat { grid-template-columns: repeat(3, 1fr); }
+    .card { padding: 26px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); transition: transform .2s, border-color .2s; }
+    .card:hover { transform: translateY(-3px); border-color: rgba(77, 163, 255, .45); }
+    .ico { width: 46px; height: 46px; display: grid; place-items: center; margin-bottom: 16px; border-radius: 12px; background: rgba(77, 163, 255, .12); color: var(--blue); }
+    .ico.g { background: rgba(51, 225, 154, .12); color: var(--green); }
+    .ico.a { background: rgba(255, 176, 32, .13); color: var(--amber); }
+    .ico svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .card h3 { margin-bottom: 8px; font-size: 19px; }
+    .card p { margin: 0; color: var(--dim); font-size: 15.5px; }
+
+    /* telas */
+    .shots { background: var(--bg2); border-block: 1px solid var(--line); }
+    .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 26px; }
+    .tab { padding: 9px 18px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--dim); font: 600 14px 'Inter', sans-serif; cursor: pointer; }
+    .tab:hover { color: var(--text); }
+    .tab[aria-selected="true"] { background: var(--blue); border-color: var(--blue); color: #06101F; }
+    .shot { display: none; grid-template-columns: 1fr; gap: 22px; align-items: start; }
+    .shot.on { display: grid; }
+    .shot .frame { cursor: zoom-in; }
+    .shot figcaption h3 { margin-bottom: 8px; font-size: 22px; }
+    .shot figcaption p { margin: 0 0 8px; color: var(--dim); }
+    .shot.phone { grid-template-columns: 280px 1fr; align-items: center; }
+    .shot.phone .frame { max-width: 280px; }
+
+    /* como funciona */
+    .arch { display: grid; grid-template-columns: 1fr auto 1.15fr auto 1fr; gap: 14px; align-items: center; }
+    .node { padding: 22px; border-radius: 16px; background: var(--card); border: 1px solid var(--line); }
+    .node h3 { font-size: 17px; margin-bottom: 10px; }
+    .node ul { margin: 0; padding-left: 18px; color: var(--dim); font-size: 15px; }
+    .node.hub { background: linear-gradient(160deg, rgba(77, 163, 255, .16), rgba(51, 225, 154, .1)); border-color: rgba(77, 163, 255, .5); box-shadow: 0 0 60px rgba(77, 163, 255, .1); }
+    .arrow { color: var(--blue); font-size: 26px; text-align: center; }
+    .points { margin-top: 28px; grid-template-columns: repeat(3, 1fr); }
+    .points .card { padding: 20px; }
+    .points h3 { font-size: 16px; }
+    .points p { font-size: 14.5px; }
+
+    /* config */
+    .cfg { grid-template-columns: repeat(4, 1fr); }
+    .cfg .card { padding: 20px; }
+    .cfg .card:last-child:nth-child(4n+1) { grid-column: 1 / -1; }
+    .cfg h3 { font-size: 16px; margin-bottom: 6px; }
+    .cfg p { font-size: 14.5px; }
+
+    /* começar */
+    .start { grid-template-columns: 1fr 1fr; }
+    .step { counter-increment: s; }
+    .step h3::before { content: counter(s); display: inline-grid; place-items: center; width: 30px; height: 30px; margin-right: 10px; border-radius: 50%; background: var(--grad); color: #06101F; font-size: 15px; }
+    .steps { counter-reset: s; }
+    .code { position: relative; margin-top: 14px; padding: 16px 52px 16px 18px; border-radius: 12px; background: #080E1B; border: 1px solid var(--line); overflow-x: auto; }
+    .code pre { margin: 0; color: #CFE3FF; white-space: pre; font: 13.5px/1.7 ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .copy { position: absolute; right: 8px; top: 8px; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--dim); font: 600 12px 'Inter', sans-serif; cursor: pointer; }
+    .copy:hover { color: var(--text); }
+
+    /* aviso */
+    .warn { display: grid; grid-template-columns: auto 1fr; gap: 18px; padding: 26px; border-radius: 16px; background: rgba(255, 176, 32, .08); border: 1px solid rgba(255, 176, 32, .4); }
+    .warn svg { width: 34px; height: 34px; fill: none; stroke: var(--amber); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    .warn h3 { margin-bottom: 6px; font-size: 20px; }
+    .warn p { margin: 0 0 8px; color: var(--dim); }
+    .warn p:last-child { margin: 0; }
+
+    /* rodapé */
+    footer { padding: 44px 0 56px; border-top: 1px solid var(--line); color: var(--dim); font-size: 14.5px; }
+    .foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
+    .foot nav { display: flex; flex-wrap: wrap; gap: 20px; }
+    .legal { margin-top: 22px; font-size: 13px; opacity: .8; }
+
+    /* ampliar imagem */
+    .lb { position: fixed; inset: 0; z-index: 100; display: none; place-items: center; padding: 20px; background: rgba(5, 8, 14, .92); cursor: zoom-out; }
+    .lb.on { display: grid; }
+    .lb img { max-height: 92vh; max-width: 96vw; border-radius: 10px; box-shadow: 0 20px 80px #000; }
+
+    .reveal { opacity: 0; transform: translateY(18px); transition: opacity .6s, transform .6s; }
+    .reveal.in { opacity: 1; transform: none; }
+    :focus-visible { outline: 3px solid rgba(77, 163, 255, .7); outline-offset: 3px; border-radius: 6px; }
+
+    @media (max-width: 960px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .hero-shot { transform: none; }
+      .feat, .cfg, .points { grid-template-columns: 1fr 1fr; }
+      .arch { grid-template-columns: 1fr; }
+      .arrow { transform: rotate(90deg); }
+      .start { grid-template-columns: 1fr; }
+      .nav ul { display: none; }
+      .stats-in { grid-template-columns: 1fr 1fr; }
+      .shot.phone { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      section { padding: 64px 0; }
+      .feat, .cfg, .points { grid-template-columns: 1fr; }
+      .hero { padding-top: 48px; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } .reveal { opacity: 1; transform: none; } }
+  </style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="assets/logo-192.png" alt=""> Diogows</a>
+    <ul>
+      <li><a href="#recursos">Recursos</a></li>
+      <li><a href="#telas">Telas</a></li>
+      <li><a href="#como">Como funciona</a></li>
+      <li><a href="#baixar">Baixar</a></li>
+      <li><a href="#comecar">Começar</a></li>
+      <li><a href="https://github.com/exadmax/diogogows/blob/main/docs/como-funciona/README.md">Documentação</a></li>
+    </ul>
+    <a class="btn ghost sm" href="https://github.com/exadmax/diogogows">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+      GitHub
+    </a>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <span class="pill"><i></i> Código aberto · GPL-3.0</span>
+        <h1>Uma área de trabalho <em>dentro do navegador</em>.</h1>
+        <p class="lead">Janelas, menu Iniciar, ícones e barra de tarefas, com login e vários usuários. Arquivos, documentos, planilhas, e-mail, mensagens, calendário, emuladores e programas DOS, em qualquer tela da casa, num único servidor leve que roda no seu próprio equipamento.</p>
+        <div class="cta">
+          <a class="btn pri" href="#comecar">Começar agora</a>
+          <a class="btn ghost" href="#baixar">Baixar</a>
+          <a class="btn ghost" href="https://github.com/exadmax/diogogows">Ver no GitHub</a>
+        </div>
+        <div class="badges">
+          <span class="badge"><b>Go</b> · um binário só</span>
+          <span class="badge"><b>Vários</b> usuários</span>
+          <span class="badge"><b>Sem build</b> no front-end</span>
+          <span class="badge"><b>2 GB</b> de RAM bastam</span>
+        </div>
+      </div>
+      <div class="frame hero-shot"><img src="img/desktop-explorer.png" alt="Diogows com o Explorer aberto e o menu Iniciar listando os aplicativos" width="1920" height="1080"></div>
+    </div>
+  </section>
+
+  <section class="stats" aria-label="Em números">
+    <div class="wrap">
+      <div class="stats-in">
+        <div class="stat"><b>500 MB</b><span>é o teto de memória do serviço</span></div>
+        <div class="stat"><b>30+</b><span>aplicativos no menu Iniciar</span></div>
+        <div class="stat"><b>0</b><span>nuvem de terceiros para os seus arquivos</span></div>
+        <div class="stat"><b>1</b><span>pasta com tudo, fácil de fazer backup</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="recursos">
+    <div class="wrap">
+      <span class="eyebrow">Recursos</span>
+      <h2 class="sec-h">Um escritório, uma caixa de entrada e uma sala de jogos no navegador</h2>
+      <p class="sec-p">Cada pessoa da casa entra com o seu usuário e tem a própria pasta. O administrador decide quem pode usar o Terminal e os arquivos do computador. As janelas abrem em tela cheia no celular e no tablet.</p>
+      <div class="grid feat">
+        <article class="card reveal"><div class="ico"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/></svg></div><h3>Vários usuários</h3><p>Cada pessoa com a sua conta, a sua pasta e as suas preferências. O administrador libera, usuário por usuário, o que cada um pode usar. Senha inicial sorteada e troca obrigatória no primeiro acesso.</p></article>
+        <article class="card reveal"><div class="ico g"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></svg></div><h3>Iniciar por categorias e menu de contexto</h3><p>O menu Iniciar agrupa os aplicativos por categoria, com busca, e lembra o estado. Botão direito (ou toque longo no celular e tablet) abre menus na área de trabalho, nos ícones, na barra de tarefas, nas janelas e no Explorer. Em telas estreitas, as janelas ocupam a tela inteira.</p></article>
+        <article class="card reveal"><div class="ico a"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></div><h3>Área de Trabalho com seus arquivos</h3><p>Solte arquivos, pastas e atalhos de aplicativos direto na área de trabalho: envie do aparelho, do Explorer ou arrastando. Cada ícone abre com o programa certo.</p></article>
+        <article class="card reveal"><div class="ico"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2.5h8a2 2 0 0 1 2 2V18a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></div><h3>Explorer e arquivos do computador</h3><p>Navegue, envie, renomeie, mova arrastando e apague. Botões para criar documento, planilha e apresentação. Quem tem permissão alterna para os arquivos do servidor e pode agir como root (sudo), com a senha do administrador.</p></article>
+        <article class="card reveal"><div class="ico g"><svg viewBox="0 0 24 24"><path d="M6 3h8l4 4v14H6Z"/><path d="M14 3v4h4M9 12h6M9 15.5h6M9 8.5h2"/></svg></div><h3>LiteOffice Documentos (.docx e .odt)</h3><p>Editor leve, no navegador, que abre e salva Word e LibreOffice: títulos, negrito, listas, tabelas, links e imagens. Avisa antes de sobrescrever um arquivo com recursos que ele não mantém.</p></article>
+        <article class="card reveal"><div class="ico a"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M3 15h18M9 4v16M15 4v16"/></svg></div><h3>LiteOffice Planilhas (.xlsx, .ods e CSV)</h3><p>Cerca de 100 fórmulas, em inglês e em português (=SOMA, =SE, =PROCV), várias abas, preencher arrastando, congelar painéis, mesclar, formatos de número e data e ordenação. A grade usa canvas e abriu 200 mil células em menos de 3 s.</p></article>
+        <article class="card reveal"><div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div><h3>LiteOffice Apresentações (.pptx e .odp)</h3><p>Slides em miniatura, caixas de texto, formas, setas, imagens, notas do apresentador e modo Apresentar em tela cheia. Lê modelos do PowerPoint.</p></article>
+        <article class="card reveal"><div class="ico g"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg></div><h3>LiteOffice Completo</h3><p>O LibreOffice inteiro (Writer, Calc, Impress) rodando no navegador em WebAssembly, para o que os editores leves não fazem. Abre .doc, .xls, .ppt, .rtf e mais; exige HTTPS ou localhost.</p></article>
+        <article class="card reveal"><div class="ico g"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 3v3M12 8v2M12 12v2"/><rect x="9.5" y="15" width="5" height="4" rx="1"/></svg></div><h3>Zip Manager</h3><p>Abre, cria e altera arquivos .zip no navegador: extrai tudo ou só o que escolher, adiciona arquivos e pastas arrastando, e compacta pastas do Explorer com o botão direito. Confere a integridade e descarta caminhos perigosos.</p></article>
+        <article class="card reveal"><div class="ico a"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg></div><h3>Navegador e downloads</h3><p>O servidor busca a página e entrega limpa, sem executar script. Arquivos baixam em segundo plano para Meus arquivos/Downloads, com progresso, e podem ser instalados como programa. Só sites da internet, nunca a rede da casa.</p></article>
+        <article class="card reveal"><div class="ico"><svg viewBox="0 0 24 24"><rect x="2.5" y="7" width="19" height="10" rx="4"/><path d="M7 10v4M5 12h4M16 11h.1M18 13h.1"/></svg></div><h3>Programas DOS e sistemas virtuais</h3><p>Instale programas DOS (.zip ou .jsdos) e rode no navegador com o js-dos, nas engines DOSBox e DOSBox-X em WebAssembly, já dentro do servidor. Windows 3.x, 95, 98 e ME rodam como sistemas virtuais com o disco salvo no servidor, só com imagem sua e licenciada; testado de ponta a ponta com o Windows 3.11.</p></article>
+        <article class="card reveal"><div class="ico g"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg></div><h3>Painel de Controle e Instalar Programas</h3><p>Um lugar só para programas, sistema, contas, calendário, câmeras e rede, com busca. O administrador abre a Config do painel aba por aba. Os acessórios podem ser mostrados ou escondidos do menu.</p></article>
+        <article class="card reveal"><div class="ico a"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4Z"/><path d="M8 9.5h8M8 12.5h5"/></svg></div><h3>Mensagens</h3><p>Conversa entre usuários com envio de arquivos e imagens (arraste, cole um print ou use o clipe), avisos no sino e confirmação de visto. Anexos podem ser salvos em Meus arquivos/Recebidos.</p></article>
+        <article class="card reveal"><div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><circle cx="17" cy="16" r="2"/></svg></div><h3>Calendário por usuário, com avisos</h3><p>Cada um junta as suas agendas iCal num só calendário (mês ou próximos dias) e recebe avisos no Diogows: sino, tela e som, antes e na hora do compromisso.</p></article>
+        <article class="card reveal"><div class="ico g"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 10l3 2.5L7 15M12.5 15H17"/></svg></div><h3>Terminal</h3><p>Comandos no servidor de qualquer aparelho da rede, com opção sudo. Desligado por padrão e liberado só a quem o administrador autorizar; cada comando fica no journal.</p></article>
+        <article class="card reveal"><div class="ico a"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-4.5L8 19"/></svg></div><h3>Visualizadores e Bloco de Notas</h3><p>Imagens, PDF e um bloco de notas com realce de cores (JSON, log, Markdown, CSV, código), abrindo arquivos da sua pasta ou, com permissão, os do computador.</p></article>
+        <article class="card reveal"><div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9.5v5l4.5-2.5Z"/></svg></div><h3>Player de vídeo</h3><p>Biblioteca de vídeos da casa com legenda e arquivos do Explorer, avançar e voltar, velocidade e lista de reprodução, direto no navegador.</p></article>
+        <article class="card reveal"><div class="ico g"><svg viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 1 2-2h2l1.5-2h7L17 6h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="12.5" r="3.5"/></svg></div><h3>Câmeras em janelas</h3><p>Cada câmera abre numa janela separada, ou todas em mosaico. Só o administrador adiciona, renomeia e remove câmeras.</p></article>
+        <article class="card reveal"><div class="ico a"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></div><h3>Meu Computador e Contatos</h3><p>Sistema, CPU, memória, discos e rede do servidor, com atalho para as unidades no Explorer. E a lista de profissionais da casa, com ligação e WhatsApp.</p></article>
+            </div>
+      <div class="warn reveal" style="margin-top:28px">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l9.5 16.5h-19L12 3.5Z"/><path d="M12 10v4.5M12 17.4v.1"/></svg>
+        <div>
+          <h3>Terminal e arquivos do computador vêm desligados</h3>
+          <p>Dão a quem tem permissão o poder do usuário do serviço e, com o sudo, o de <b>root</b>. Ligue em <code>"desk": {"shell": true}</code> no <code>diogows.config.json</code> e, para o sudo, rode <code>sudo bash install.sh --desk-shell</code>. Cada uso exige a sua senha, rede local ou HTTPS e fica registrado. Leia o <a href="https://github.com/exadmax/diogogows/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="telas" class="shots">
+    <div class="wrap">
+      <span class="eyebrow">Telas</span>
+      <h2 class="sec-h">Janelas de verdade, em qualquer navegador</h2>
+      <p class="sec-p">As capturas usam dados fictícios. Clique para ampliar.</p>
+      <div class="tabs" role="tablist" aria-label="Telas do sistema">
+        <button class="tab" role="tab" aria-selected="true" data-t="dkx">Explorer e menu Iniciar</button>
+        <button class="tab" role="tab" aria-selected="false" data-t="dkd">Documentos</button>
+        <button class="tab" role="tab" aria-selected="false" data-t="dkc">Calendário</button>
+      </div>
+      <figure class="shot on" data-s="dkx" style="margin:0">
+        <div class="frame"><img src="img/desktop-explorer.png" alt="Diogows com o Explorer e o menu Iniciar" loading="lazy"></div>
+        <figcaption><h3>Explorer e menu Iniciar</h3><p>Janelas que se movem, redimensionam e minimizam. O menu Iniciar agrupa os aplicativos por categoria, com busca e "mais usados", e traz os atalhos do painel da casa, se a Central Diogo estiver por perto.</p></figcaption>
+      </figure>
+      <figure class="shot" data-s="dkd" style="margin:0">
+        <div class="frame"><img src="img/desktop-documentos.png" alt="Editor de documentos Word e LibreOffice no Diogows" loading="lazy"></div>
+        <figcaption><h3>Documentos .docx e .odt</h3><p>Abre e salva nas pastas dos usuários, com títulos, estilos, cor e tamanho da letra, listas, tabelas, links e imagens. Avisa antes de substituir um arquivo com recursos que o editor não mantém.</p></figcaption>
+      </figure>
+      <figure class="shot" data-s="dkc" style="margin:0">
+        <div class="frame"><img src="img/desktop-calendario.png" alt="Calendário do Diogows com avisos de compromissos" loading="lazy"></div>
+        <figcaption><h3>Calendário com avisos</h3><p>As agendas iCal de cada usuário num só calendário. Os avisos aparecem no Diogows dele (sino, tela e som), 10 minutos antes e na hora do compromisso.</p></figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="como">
+    <div class="wrap">
+      <span class="eyebrow">Como funciona</span>
+      <h2 class="sec-h">Um serviço entre outros, no servidor da casa</h2>
+      <p class="sec-p">O Diogows tem binário, porta, banco e pasta de dados próprios, como o Navidrome. Funciona sozinho; se a Central Diogo estiver por perto, ele mostra as câmeras, os contatos e as agendas da casa.</p>
+      <div class="arch reveal">
+        <div class="node"><h3>Seus aparelhos</h3><ul><li>Navegador do PC</li><li>Celular ou tablet</li><li>Navegador da TV</li></ul></div>
+        <div class="arrow" aria-hidden="true">⇄</div>
+        <div class="node hub"><h3>Diogows (Go, porta 8090)</h3><ul><li>Serve a área de trabalho</li><li>Login e vários usuários</li><li>SQLite + pasta de arquivos</li><li>E-mail, navegador e terminal</li></ul></div>
+        <div class="arrow" aria-hidden="true">⇄</div>
+        <div class="node"><h3>Ao redor</h3><ul><li><a href="https://github.com/exadmax/DVRCentral">Central Diogo</a>: câmeras, contatos, agendas</li><li>Provedores de e-mail (IMAP/SMTP)</li><li>Navidrome e outros serviços</li></ul></div>
+      </div>
+      <div class="grid points">
+        <article class="card reveal"><h3>Leve e independente</h3><p>Binário Go sem CGO, SQLite em Go puro e front-end em JavaScript sem build. O serviço limita a memória (500 MB) e convive com os outros na mesma máquina.</p></article>
+        <article class="card reveal"><h3>Segredos no servidor</h3><p>Senhas só como hash, credenciais de e-mail cifradas e agendas mascaradas na API. O navegador interno só alcança a internet, nunca a sua rede.</p></article>
+        <article class="card reveal"><h3>Você entende e muda</h3><p>A documentação ensina o projeto por dentro: arquitetura, servidor, front-end, segurança e receitas para criar um aplicativo novo. <a href="https://github.com/exadmax/diogogows/blob/main/docs/como-funciona/README.md">Ler</a>.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section id="baixar">
+    <div class="wrap">
+      <span class="eyebrow">Baixar</span>
+      <h2 class="sec-h">Escolha o seu sistema</h2>
+      <p class="sec-p">Pacotes prontos, sem compilar nada, nas <a href="https://github.com/exadmax/diogogows/releases">Releases do GitHub</a>. Os links sempre apontam para a versão mais recente (a primeira release ainda está para sair; até lá, <a href="#comecar">compile do código</a>).</p>
+      <div class="grid start">
+        <article class="card reveal">
+          <h3>Windows</h3>
+          <p>Instalador em janela, sem terminal. Ele pergunta se este PC será o <b>servidor da casa</b> (liga com o Windows e atende a rede) ou de <b>uso pessoal</b> (só neste computador). Windows 10 ou 11, 64 bits.</p>
+          <p style="margin:16px 0"><a class="btn pri" href="https://github.com/exadmax/diogogows/releases/latest/download/diogows-windows.zip">Baixar para Windows (.zip)</a></p>
+          <p style="color:var(--dim)">Extraia o .zip e dê dois cliques em <code>Instalar.cmd</code>. A janela mostra a senha inicial do <code>admin</code> no fim: anote. Se o Windows avisar sobre "editor desconhecido", escolha <b>Mais informações &rarr; Executar assim mesmo</b>.</p>
+        </article>
+        <article class="card reveal">
+          <h3>Linux</h3>
+          <p>Pacote para Debian e derivados, com os binários para <code>amd64</code>, <code>arm64</code>, <code>arm</code> e <code>386</code>. Instala como serviço do systemd em <code>/opt/diogows</code>, na porta 8090.</p>
+          <p style="margin:16px 0"><a class="btn pri" href="https://github.com/exadmax/diogogows/releases/latest/download/diogows.tgz">Baixar para Linux (.tgz)</a></p>
+          <div class="code"><button class="copy" type="button">Copiar</button><pre>mkdir dw &amp;&amp; tar xzf diogows.tgz -C dw
+cd dw &amp;&amp; sudo bash install.sh</pre></div>
+        </article>
+      </div>
+      <p style="margin-top:22px;color:var(--dim)">Outras versões e as notas de cada uma: <a href="https://github.com/exadmax/diogogows/releases">todas as releases</a>. Para conferir o arquivo baixado, use o <a href="https://github.com/exadmax/diogogows/releases/latest/download/SHA256SUMS">SHA256SUMS</a>.</p>
+    </div>
+  </section>
+
+  <section id="comecar">
+    <div class="wrap">
+      <span class="eyebrow">Começar</span>
+      <h2 class="sec-h">Rodando em poucos minutos</h2>
+      <p class="sec-p">Prefere compilar? Você só precisa do Go. Sem arquivo de configuração o Diogows sobe com os padrões.</p>
+      <div class="grid start steps">
+        <article class="card step reveal">
+          <h3>Teste no seu computador</h3>
+          <p>Baixe o projeto e rode o servidor a partir da pasta <code>server/</code>.</p>
+          <div class="code"><button class="copy" type="button">Copiar</button><pre>git clone https://github.com/exadmax/diogogows.git
+cd diogogows/server
+cp diogows.config.example.json diogows.config.json
+go run .</pre></div>
+          <p style="margin-top:14px">Abra <code>http://localhost:8090</code>. Na primeira vez, o log mostra a senha inicial do usuário <code>admin</code> (a troca é obrigatória no primeiro login).</p>
+        </article>
+        <article class="card step reveal">
+          <h3>Instale no servidor Linux</h3>
+          <p>Gere o pacote no seu PC e instale como serviço (Debian ou derivados).</p>
+          <div class="code"><button class="copy" type="button">Copiar</button><pre>cd server
+./package.sh              # gera dist/diogows.tgz
+# no servidor, com o pacote extraído:
+sudo bash install.sh      # /opt/diogows, porta 8090</pre></div>
+          <p style="margin-top:14px">Depois, abra <code>http://servidor:8090</code> no navegador.</p>
+        </article>
+        <article class="card step reveal">
+          <h3>Já usava o Diogows dentro da Central?</h3>
+          <p>Ele já morou dentro da <a href="https://github.com/exadmax/DVRCentral">Central Diogo</a>. Para levar usuários, mensagens, e-mails e arquivos para o serviço novo, sem perder nada:</p>
+          <div class="code"><button class="copy" type="button">Copiar</button><pre>sudo bash install.sh --import-central /opt/centraldiogo</pre></div>
+          <p style="margin-top:14px">A Central não é alterada. Passo a passo em <a href="https://github.com/exadmax/diogogows/blob/main/docs/como-funciona/migracao-da-central.md">migracao-da-central.md</a>.</p>
+        </article>
+      </div>
+      <p style="margin-top:22px;color:var(--dim)">Mais detalhes no <a href="https://github.com/exadmax/diogogows#readme">README</a>, no <a href="https://github.com/exadmax/diogogows/blob/main/docs/desktop.md">guia do desktop</a> e em <a href="https://github.com/exadmax/diogogows/blob/main/docs/como-funciona/README.md">como o projeto funciona</a>.</p>
+    </div>
+  </section>
+
+  <section style="padding-top:0">
+    <div class="wrap">
+      <div class="warn reveal">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.500l9.500 16.500h-19L12 3.500Z"/><path d="M12 10v4.500M12 17.400v.1"/></svg>
+        <div>
+          <h3>Feito para a rede da sua casa</h3>
+          <p>O Diogows tem login, mas em HTTP puro as senhas trafegam sem criptografia. <b>Não exponha à internet.</b> Para acessar de fora, use uma VPN (Tailscale, WireGuard) ou um proxy reverso com HTTPS. Veja o <a href="https://github.com/exadmax/diogogows/blob/main/SECURITY.md">SECURITY.md</a>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <a class="brand" href="#top"><img src="assets/logo-192.png" alt=""> Diogows</a>
+      <nav>
+        <a href="https://github.com/exadmax/diogogows">GitHub</a>
+        <a href="https://github.com/exadmax/diogogows/blob/main/docs/desktop.md">Guia do desktop</a>
+        <a href="https://github.com/exadmax/diogogows/blob/main/docs/como-funciona/README.md">Como funciona</a>
+        <a href="https://exadmax.github.io/DVRCentral/">Central Diogo</a>
+        <a href="https://github.com/exadmax/diogogows/blob/main/SECURITY.md">Segurança</a>
+        <a href="https://github.com/exadmax/diogogows/blob/main/LICENSE">Licença GPL-3.0</a>
+      </nav>
+    </div>
+    <p class="legal">Projeto de código aberto sob a GNU GPL v3. Gmail, Outlook, Google e Microsoft são marcas de seus respectivos donos; este projeto não é afiliado a elas. O Diogows não traz ROMs nem imagens de sistemas proprietários: use só o que você tem direito de usar.</p>
+  </div>
+</footer>
+
+<div class="lb" id="lb" role="dialog" aria-label="Imagem ampliada"><img alt=""></div>
+
+<script>
+  (function () {
+    // abas de telas
+    var tabs = document.querySelectorAll('.tab'), shots = document.querySelectorAll('.shot');
+    tabs.forEach(function (t) {
+      t.addEventListener('click', function () {
+        tabs.forEach(function (x) { x.setAttribute('aria-selected', x === t ? 'true' : 'false'); });
+        shots.forEach(function (s) { s.classList.toggle('on', s.getAttribute('data-s') === t.getAttribute('data-t')); });
+      });
+    });
+    // ampliar
+    var lb = document.getElementById('lb'), lbi = lb.querySelector('img');
+    document.querySelectorAll('.shot .frame img').forEach(function (i) {
+      i.addEventListener('click', function () { lbi.src = i.src; lbi.alt = i.alt; lb.classList.add('on'); });
+    });
+    lb.addEventListener('click', function () { lb.classList.remove('on'); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') lb.classList.remove('on'); });
+    // copiar comandos
+    document.querySelectorAll('.copy').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var txt = b.parentNode.querySelector('pre').textContent;
+        function ok() { b.textContent = 'Copiado!'; setTimeout(function () { b.textContent = 'Copiar'; }, 1600); }
+        if (navigator.clipboard) navigator.clipboard.writeText(txt).then(ok, function () {});
+      });
+    });
+    // entrada suave
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .12 });
+      document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
+    } else { document.querySelectorAll('.reveal').forEach(function (el) { el.classList.add('in'); }); }
+  })();
+</script>
+</body>
+</html>
